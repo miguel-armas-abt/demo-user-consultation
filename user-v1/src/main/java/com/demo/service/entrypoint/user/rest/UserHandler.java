@@ -4,8 +4,6 @@ import com.demo.commons.restserver.utils.RestServerUtils;
 import com.demo.commons.validations.headers.DefaultHeaders;
 import com.demo.commons.validations.ParamValidator;
 
-import java.util.Map;
-
 import com.demo.service.entrypoint.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 
@@ -24,11 +22,10 @@ public class UserHandler {
   private final UserService userService;
 
   public Mono<ServerResponse> findUserById(ServerRequest serverRequest) {
-    Map<String, String> headers = RestServerUtils.extractHeadersAsMap(serverRequest);
     long userId = Long.parseLong(serverRequest.pathVariable("userId"));
 
-    return paramValidator.validateAndGet(headers, DefaultHeaders.class)
-        .flatMap(defaultHeaders -> userService.findUserById(headers, userId))
+    return paramValidator.validateHeadersAndGet(serverRequest, DefaultHeaders.class)
+        .flatMap(tuple -> userService.findUserById(tuple.getValue(), userId))
         .flatMap(response -> ServerResponse.ok()
             .headers(httpHeaders -> RestServerUtils.buildResponseHeaders(serverRequest.headers()).accept(httpHeaders))
             .contentType(MediaType.APPLICATION_JSON)
