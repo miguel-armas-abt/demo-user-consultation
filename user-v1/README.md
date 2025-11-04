@@ -1,62 +1,64 @@
+Reemplazar los siguientes valores donde corresponda:
 
+| variable          | valor                        |
+|-------------------|------------------------------|
+| `<APP_IMAGE>`     | `miguelarmasabt/user:v1.0.1` |
+| `<APP_CONTAINER>` | `user-v1`                    |
+| `<APP_PORTS>`     | `8080:8080`                  |
 
-[← Regresar](../README.md) <br>
+## ▶️ Local
 
----
-## 📋 Core library
-[🌐 Documentación](https://github.com/miguel-armas-abt/backend-core-library) <br>
-[🏷️ Versión](./src/main/java/com/demo/service/commons/core/package-info.java) <br>
-
----
-
-## ▶️ Despliegue local
-
-1. Generar el compilado
-```sh
-mvn clean install
-```
-
+1. Descargar e instalar [commons-webflux-parent](https://github.com/miguel-armas-abt/commons-webflux-parent/README.md)
 2. Configurar las [variables de entorno](./variables.env) en el IDE.
-
-2. Ejecutar aplicación
-
+3. Ejecutar aplicación
 
 ---
 
-## ▶️ Despliegue con Docker
+## ▶️ Docker
 
-⚙️ Crear imagen
+1. Crear imagen
 ```shell
-docker build -t miguelarmasabt/user:v1.0.1 -f ./Dockerfile .
+docker build -t <APP_IMAGE> -f ./Dockerfile .
 ```
 
-⚙️ Ejecutar contenedor
+2. Crear red
 ```shell
-docker run --rm -p 8080:8080 --env-file ./variables.env --name user-v1  miguelarmasabt/user:v1.0.1
+docker network create --driver bridge common-network
+```
+
+3. Ejecutar contenedor
+```shell
+docker run --rm -p <APP_PORTS> --env-file ./variables.env --name <APP_CONTAINER> --network common-network <APP_IMAGE>
 ```
 
 ---
 
-## ▶️ Despliegue con Kubernetes
+## ▶️ Kubernetes
 
-⚙️ Crear imagen
+1. Encender Minikube
+```shell
+docker context use default
+minikube start
+```
+
+2. Crear imagen dentro del clúster
 ```shell
 eval $(minikube docker-env --shell bash)
-docker build -t miguelarmasabt/user:v1.0.1 -f ./Dockerfile .
+docker build -t <APP_IMAGE> -f ./Dockerfile .
 ```
 
-⚙️ Crear namespace y aplicar manifiestos
+3. Crear namespace y aplicar manifiestos
 ```shell
-kubectl create namespace poc
-kubectl apply -f ./k8s.yaml -n poc
+kubectl create namespace demo
+kubectl apply -f ./k8s.yaml -n demo
 ```
 
-⚙️ Eliminar orquestación
+4. Eliminar orquestación
 ```shell
-kubectl delete -f ./k8s.yaml -n poc
+kubectl delete -f ./k8s.yaml -n demo
 ```
 
-⚙️ Port-forward
+5. Port-forward
 ```shell
-kubectl port-forward <pod-id> 8080:8080 -n poc
+kubectl port-forward <POD_ID> <APP_PORTS> -n demo
 ```
